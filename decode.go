@@ -184,8 +184,14 @@ func (p *parser) node(kind Kind, defaultTag, tag, value string) *Node {
 		Style: style,
 	}
 	if !p.textless {
+		n.Index = p.event.start_mark.index
 		n.Line = p.event.start_mark.line + 1
 		n.Column = p.event.start_mark.column + 1
+
+		n.EndIndex = p.event.end_mark.index
+		n.EndLine = p.event.end_mark.line + 1
+		n.EndColumn = p.event.end_mark.column + 1
+
 		n.HeadComment = string(p.event.head_comment)
 		n.LineComment = string(p.event.line_comment)
 		n.FootComment = string(p.event.foot_comment)
@@ -206,6 +212,9 @@ func (p *parser) document() *Node {
 	p.parseChild(n)
 	if p.peek() == yaml_DOCUMENT_END_EVENT {
 		n.FootComment = string(p.event.foot_comment)
+		n.EndIndex = p.event.end_mark.index
+		n.EndLine = p.event.end_mark.line + 1
+		n.EndColumn = p.event.end_mark.column + 1
 	}
 	p.expect(yaml_DOCUMENT_END_EVENT)
 	return n
@@ -263,6 +272,9 @@ func (p *parser) sequence() *Node {
 	}
 	n.LineComment = string(p.event.line_comment)
 	n.FootComment = string(p.event.foot_comment)
+	n.EndIndex = p.event.end_mark.index
+	n.EndLine = p.event.end_mark.line + 1
+	n.EndColumn = p.event.end_mark.column + 1
 	p.expect(yaml_SEQUENCE_END_EVENT)
 	return n
 }
@@ -299,6 +311,9 @@ func (p *parser) mapping() *Node {
 	}
 	n.LineComment = string(p.event.line_comment)
 	n.FootComment = string(p.event.foot_comment)
+	n.EndIndex = p.event.end_mark.index
+	n.EndLine = p.event.end_mark.line + 1
+	n.EndColumn = p.event.end_mark.column + 1
 	if n.Style&FlowStyle == 0 && n.FootComment != "" && len(n.Content) > 1 {
 		n.Content[len(n.Content)-2].FootComment = n.FootComment
 		n.FootComment = ""
